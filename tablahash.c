@@ -51,7 +51,7 @@ void* tablahash_buscar(TablaHash* tabla, void* clave) {
   idx = idx % tabla->capacidad;
 
   // Si el lugar esta vacío, retornamos un puntero nulo.
-  if (!(tabla->igualdad(tabla->tabla[idx].clave, clave)))
+  if (tabla->tabla[idx].clave == NULL)
     return NULL;
 
   // La funcion buscarEnLista va a ser la funcion que recorre la LE y busca por la clave.
