@@ -1,5 +1,4 @@
 #include "tablahash.h"
-#include <assert.h>
 #include <stdlib.h>
 
 /**
@@ -33,18 +32,12 @@ void tablahash_insertar(TablaHash* tabla, void* clave, void* dato) {
   unsigned idx = tabla->hash(clave);
   idx = idx % tabla->capacidad;
 
-  // Old: Si el lugar estaba vacío, incrementamos el número de elementos.
-  // New: En la nueva implementacion, siempre deberiamos incrementar el numero de elementos, porque siempre se insertan 
-  // aunque la casilla ya tuviese algo.
-  //if (tabla->tabla[idx].clave == NULL)
-  
+  // Siempre deberiamos incrementar el numero de elementos, porque siempre se insertan aunque la casilla ya tuviese algo.
   tabla->numElems++;
 
   // Almacenamos los datos ingresados.
-  // La calve se sigue ingresando de la misma manera.
-  tabla->tabla[idx].clave = clave;
   // El dato ahora se inserta con la funcion de encadenar que arma la lista enlazada
-  //tabla->tabla[idx].dato = dato;
+  tabla->tabla[idx].clave = clave;
   (tabla->manejoColisiones).encadenar( &(tabla->tabla[idx].inicioLE), dato);
 }
 

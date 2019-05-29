@@ -1,50 +1,14 @@
 #include "tablahash.h"
-#include <assert.h>
+#include "sglist.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-
-unsigned long long slash_hash(void *string) {
-    union { 
-    	unsigned long long h; 
-    	unsigned char u[8]; 
-    } uu;
-
-    char* s = (char*)string;
-    int i=0; 
-    uu.h=strlen(s);
-    
-    while(*s){ 
-    	uu.u[i%8] += *s + i + (*s >> ( ( (uu.h) / (i+1) ) % 5 ) ); 
-    	s++; 
-    	i++; 
-    }
-
-    return uu.h;
-}
-
-unsigned funcionPropia(void *clave) {
-	unsigned key = 0;
-	char *palabra = (char*)clave;
-	for(int i = 0; palabra[i]; i++){
-		key += palabra[i]*(pow(33,i));
-	}
-	key = key * strlen(palabra);
-	return key;
-}
-
-unsigned djb2(void* clave) {
-	unsigned long key = 5381; // constante magica
-	int c;
-	unsigned char* p = (unsigned char*)clave;
-	while( (c = *p++) ){
-		key = ( (key << 5) + key ) + c; /* (key * 33) + c */ 
-	}
-	return key;
-}
+#include <locale.h>
+#include <wchar.h>
 
 unsigned cantidadPalabras(char* nombreArchivo) {
+	// TODO ver por que con menos de 10 palabras me devuelve 1 palabra menos
 	unsigned i = 0, palabras, longitudPromedio = 10;
     float aux;
 
@@ -63,33 +27,88 @@ unsigned cantidadPalabras(char* nombreArchivo) {
     return palabras/longitudPromedio;
 }
 
-int ClavesUnsignedIguales(void* clave1, void* calve2) {
-	// TODO Esto debe estar mal. Checkear que ande como debe.
+unsigned djb2(void* clave) {
+	unsigned long key = 5381; // constante magica
+	int c;
+	wchar_t* p = (wchar_t*)clave;
+	while( (c = *p++) ){
+		key = ( (key << 5) + key ) + c; /* (key * 33) + c */ 
+	}
+	return key;
+}
+
+int clavesIguales(void* clave1, void* clave2) {
+	// TODO Checkear que ande como debe.
 	if(clave1 == NULL){
 		return 0;
 	} else {
-		if(calve2 == NULL){
+		if(clave2 == NULL){
 			return 0;
 		} else {
-			return ( (*((unsigned*)clave1)) == (*((unsigned*)calve2)) );
+			if(wcscmp( (wchar_t*)clave1, (wchar_t*)clave2 ) == 0 ){
+				return 1;
+			} else {
+				return 0;
+			}
 		}
 	}
 }
 
+int cargarArchivo(TablaHash *tabla, const char* nombreArchivo){
+	// TODO la regex esta sirve para leer el archivo del diccionario. Hay que armar una nueva para leer el archivo de ingreso
+	FILE* f = fopen(nombreArchivo, "r");
+	wchar_t buff[100];
+	int i = 0, largoPalabra;
+	void *clave, *dato;
+	while( (fwscanf(f, L"%[^\r\n]\r\n", buff)) == 1 ){
+		largoPalabra = wcslen(buff);
+		buff[largoPalabra] = '\0';
+		
+		clave = malloc(sizeof(wchar_t) * (largoPalabra + 1) );
+		memcpy(clave ,buff, sizeof(wchar_t) * (largoPalabra + 1));
+		dato = malloc(sizeof(wchar_t) * (largoPalabra + 1) );
+		memcpy(dato ,buff, sizeof(wchar_t) * (largoPalabra + 1));
+		tablahash_insertar(tabla, clave, dato);
+		
+		i++;
+	}
+	return i;
+}
+
 int main() {
+	// IMPORTANTE: Cambie la codificacion del archivo a windows 1252. Esto puede hacer q en linux no funque. Aldu
+	setlocale(LC_CTYPE, "");
+
 	unsigned palabras = cantidadPalabras("listado-general.txt");
 
 	FuncionHash fh = &djb2;
-	FuncionIgualdad fi = &ClavesUnsignedIguales;
+	FuncionIgualdad fi = &clavesIguales;
 	funcionesColisiones manejoColisiones;
-	/*
-	NECESITO LO DE LISTAS
+	manejoColisiones.encadenar = &glist_agregar_inicio;
+	manejoColisiones.buscarEnLista = &glist_buscar;
+	manejoColisiones.eliminarLista = &glist_eliminar_nodo;
 
-	manejoColisiones.encadenar = ;
-	manejoColisiones.buscarEnLista = ;
-	manejoColisiones.eliminarLista = ;
 	TablaHash *MiTabla = tablahash_crear(palabras, fh, fi, manejoColisiones);
-	*/
+
+	cargarArchivo(MiTabla, "listado-general.txt");
+	
+	// Testeado de la funcion hash
+	int cant_nodos, max = 0, cant_cero=0, cuenta_total = 0, cantidadColisiones = 0;
+	for(int i = 0; i < palabras; i++){
+		cant_nodos = glist_size((GList)MiTabla->tabla[i].inicioLE);
+		if(cant_nodos > max)
+			max = cant_nodos;
+
+		if(cant_nodos == 0)
+			cant_cero++;
+
+		if(cant_nodos > 1){
+			cantidadColisiones++;
+		}
+
+		cuenta_total+=cant_nodos;
+	}
+	printf("Maximas colisiones:%d\nCantidad de casillas sin ocupar:%d\nCheck que se hayan insertado todas las palabras:%d\nCasillas con colisiones:%d\n", max, cant_cero, cuenta_total, cantidadColisiones);
 
 	return 0;
 }
