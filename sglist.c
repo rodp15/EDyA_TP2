@@ -96,19 +96,8 @@ int glist_size(GList lista){
 void eliminar_repetidos(GList lista, Predicado2 valoresIguales, Copia c, Eliminadora e){
   GList resultado;
   for (; lista != NULL; lista = lista->sig){
-    /*
-    for (GNodo *nodoActual = nodo->sig; nodoActual!=NULL; nodoActual=nodoActual-sig)
-    {
-      if(wcscmp(nodo->dato, nodoActual->dato)==0){
-        glist_eliminar_nodo(nodoActual,FAK);
-      }
-    }*/
-
     resultado=filter2(lista->sig, valoresIguales, c, lista->dato);
-
-    // TODO NO ANDA ESTO COMO DEBERIA URGENTE!!!
-    //glist_destruir(lista->sig, e);
-
+    glist_destruir(lista->sig, e);
     lista->sig = resultado;
   }
 }
@@ -160,14 +149,16 @@ int intNoIguales(void* dato1, void* dato2){
 
 int main(){
   GList l = glist_crear();
-  int* j;
+  int *j, *k;
 
   for (int i = 0; i < 5; ++i)
   {
     j = malloc(sizeof(int));
+    k = malloc(sizeof(int));
     *j=i;
+    *k=i;
     glist_agregar_inicio(((void**)&l),(void*)(j));
-    glist_agregar_inicio(((void**)&l),(void*)(j));
+    glist_agregar_inicio(((void**)&l),(void*)(k));
   }
 
   for (GList i = l; i != NULL; i=i->sig)
