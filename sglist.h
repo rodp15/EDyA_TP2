@@ -8,7 +8,7 @@ typedef struct _GNodo{
 
 typedef GNodo *GList;
 
-typedef int (*Predicado) (void* dato);
+typedef int (*Predicado) (TablaHash* tabla, void* dato);
 typedef int (*Predicado2) (void* dato1, void* dato2);
 typedef void* (*Copia) (void*);
 typedef void (*Eliminadora) (GList);
@@ -63,4 +63,7 @@ Elimina valores repetidos de la lista, por lo que la ocurrencia de cada valor es
 */
 void eliminar_repetidos(GList lista, Predicado2 valoresIguales, Copia c, Eliminadora e);
 
-
+/*
+Concatena dos listas
+*/
+GList concatenar_listas(GList lista1, GList lista2);

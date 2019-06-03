@@ -71,10 +71,10 @@ void glist_destruir(GList lista, Eliminadora e) {
 }
 
 int glist_size(GList lista){
-	int cant=0;
-	for (GNodo *nodo = lista; nodo != NULL; cant++, nodo = nodo->sig);
+  int cant=0;
+  for (GNodo *nodo = lista; nodo != NULL; cant++, nodo = nodo->sig);
 
-	return cant;
+  return cant;
 }
 
 void eliminar_repetidos(GList lista, Predicado2 valoresIguales, Copia c, Eliminadora e){
@@ -143,7 +143,7 @@ GList concatenar_listas(GList lista1, GList lista2){
   lista1->sig = lista2;
   return referenciaOrigen;
 }
-
+/*
 int main(){
   GList l = glist_crear(), l2=glist_crear();
   int *j, *k;
@@ -161,7 +161,7 @@ int main(){
   }
 
 
-  /*
+  
   for (GList i = l; i != NULL; i=i->sig)
   {
     printf("orig 1: %d\n",*((int*)(i->dato)));
@@ -173,18 +173,15 @@ int main(){
   */
   /*
   Copia c = &copiar_int;
-
   Predicado2 p = &intNoIguales;
-
   Eliminadora e = &borrarint;
-
   eliminar_repetidos(l,p,c,e);
   
   for (GList i = l; i != NULL; i=i->sig)
   {
     printf("sin repetidos 1:%d\n",*((int*)(i->dato)));
   }
-  */
+  
 
 
   //CORREGIR
@@ -193,4 +190,4 @@ int main(){
   {
     printf("concatenadas: %d\n",*((int*)(i->dato)));
   }
-}
+}*/
