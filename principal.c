@@ -17,7 +17,9 @@ GList posibles_eliminaciones(wchar_t *palabra,int largoPalabra);
 GList posibles_cambios(wchar_t *palabra,int largoPalabra,wchar_t alfabeto[]);
 GList separadas_correctas(wchar_t *palabra,int largoPalabra);
 
-
+int esta_en_diccionario(TablaHash*tabla, wchar_t* palabra){
+	return (tablahash_buscar(tabla,palabra)!=NULL);
+}
 unsigned cantidadPalabras(char* nombreArchivo) {
 	// TODO ver por que con menos de 10 palabras me devuelve 1 palabra menos
 	unsigned i = 0, palabras, longitudPromedio = 10;
@@ -122,6 +124,9 @@ int main() {
 	printf("Maximas colisiones:%d\nCantidad de casillas sin ocupar:%d\nCheck que se hayan insertado todas las palabras:%d\nCasillas con colisiones:%d\n", max, cant_cero, cuenta_total, cantidadColisiones);
 	*/
 	GList sugerencias=buscar_sugerencias("aolh", MiTabla);
+	for(GList i=sugerencias;i!=NULL;i=i->sig){
+		wprintf(L"sugerencia: %s",((wchar_t*)i->dato));
+	}
 	return 0;
 }
 
