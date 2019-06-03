@@ -1,6 +1,7 @@
 #include "tablahash.h"
 #include "sglist.h"
 #include "tecnicasaux.h"
+#include "palabras.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -10,7 +11,7 @@
 
 #define CANT_MIN_SUGERENCIAS 5
 
-GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla);
+GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predicado2 palabras_iguales, Eliminadora e, Copia c);
 GList posibles_intercambios(wchar_t *palabra,int largoPalabra);
 GList posibles_inserciones(wchar_t *palabra,int largoPalabra,wchar_t alfabeto[]);
 GList posibles_eliminaciones(wchar_t *palabra,int largoPalabra);
@@ -19,6 +20,9 @@ GList separadas_correctas(wchar_t *palabra,int largoPalabra);
 
 int esta_en_diccionario(TablaHash*tabla, wchar_t* palabra){
 	return (tablahash_buscar(tabla,palabra)!=NULL);
+}
+int notValoresIguales(void *valor1, void *valor2){
+  return (wcscmp( (wchar_t*)valor1, (wchar_t*)valor2 ) != 0);
 }
 unsigned cantidadPalabras(char* nombreArchivo) {
 	// TODO ver por que con menos de 10 palabras me devuelve 1 palabra menos
@@ -123,14 +127,22 @@ int main() {
 	}
 	printf("Maximas colisiones:%d\nCantidad de casillas sin ocupar:%d\nCheck que se hayan insertado todas las palabras:%d\nCasillas con colisiones:%d\n", max, cant_cero, cuenta_total, cantidadColisiones);
 	*/
-	GList sugerencias=buscar_sugerencias("aolh", MiTabla);
+	Copia c = &copiar_palabra;
+
+  	Predicado p = &esta_en_diccionario;
+
+  	Predicado2 p2 = &notValoresIguales;
+
+
+  	Eliminadora e = &eliminar_palabra;
+	GList sugerencias=buscar_sugerencias("aolh", MiTabla,p,p2,e,c);
 	for(GList i=sugerencias;i!=NULL;i=i->sig){
 		wprintf(L"sugerencia: %s",((wchar_t*)i->dato));
 	}
 	return 0;
 }
 
-GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla){
+GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predicado2 palabras_iguales, Eliminadora e, Copia c){
 
 	int len=wcslen(palabra);
 	wchar_t alfabeto[34]="abcdefghijklmnñopqrstuvwxyzáéíóúöü";
@@ -176,17 +188,17 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla){
 				intercambiadasn=eliminar_repetidos(intercambiadasn,palabras_iguales,c,e);
 				GList intercambiadasnCorrectas=filter(intercambiadasn,esta_en_diccionario);
 				for(GList i=intercambiadasnCorrectas; i!=NULL;i=i->sig){
-					sugerencias=glist_agregar_inicio(sugerencias,i->dato);
+					sugerencias=glist_agregar_inicio(&sugerencias,i->dato);
 				}
 				for(GList i=intercambiadasn; i!=NULL;i=i->sig){
-					intercambiadasFinal=glist_agregar_inicio(intercambiadasFinal,i->dato);
+					intercambiadasFinal=glist_agregar_inicio(&intercambiadasFinal,i->dato);
 				}
 				glist_destruir(intercambiadasn,e);
 			}
 			glist_destruir(intercambiadas,e);
 			//guardo las nuevas intercambiadas a la distancia actual
 			for(GList i=intercambiadasFinal; i!=NULL;i=i->sig){
-					intercambiadas=glist_agregar_inicio(intercambiadas,i->dato);
+					intercambiadas=glist_agregar_inicio(&intercambiadas,i->dato);
 				}
 			glist_destruir(intercambiadasFinal,e);
 
@@ -197,17 +209,17 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla){
 				insertadasn=eliminar_repetidos(insertadasn,palabras_iguales,c,e);
 				GList insertadasCorrectasn=filter(insertadasn,esta_en_diccionario);
 				for(GList i=insertadasnCorrectasn; i!=NULL;i=i->sig){
-					sugerencias=glist_agregar_inicio(sugerencias,i->dato);
+					sugerencias=glist_agregar_inicio(&sugerencias,i->dato);
 				}
 				for(GList i=insertadasn; i!=NULL;i=i->sig){
-					insertadasFinal=glist_agregar_inicio(insertadasFinal,i->dato);
+					insertadasFinal=glist_agregar_inicio(&insertadasFinal,i->dato);
 				}
 				glist_destruir(insertadasn,e);
 			}
 			glist_destruir(insertadas,e);
 			//guardo las nuevas insertadas a la distancia actual
 			for(GList i=insertadasFinal; i!=NULL;i=i->sig){
-					insertadas=glist_agregar_inicio(insertadas,i->dato);
+					insertadas=glist_agregar_inicio(&insertadas,i->dato);
 				}
 			glist_destruir(insertadasFinal,e);
 
@@ -218,17 +230,17 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla){
 				eliminacionesn=eliminar_repetidos(eliminacionesn);
 				GList eliminadasCorrectasn=filter(eliminacionesn,esta_en_diccionario);
 				for(GList i=eliminadasCorrectasn; i!=NULL;i=i->sig){
-					sugerencias=glist_agregar_inicio(sugerencias,i->dato);
+					sugerencias=glist_agregar_inicio(&sugerencias,i->dato);
 				}
 				for(GList i=eliminacionesn; i!=NULL;i=i->sig){
-					eliminadasFinal=glist_agregar_inicio(eliminadasFinal,i->dato);
+					eliminadasFinal=glist_agregar_inicio(&eliminadasFinal,i->dato);
 				}
 				glist_destruir(eliminacionesn,e);
 			}
 			glist_destruir(eliminaciones,e);
 			//guardo las nuevas insertadas a la distancia actual
 			for(GList i=eliminadasFinal; i!=NULL;i=i->sig){
-					eliminaciones=glist_agregar_inicio(eliminaciones,i->dato);
+					eliminaciones=glist_agregar_inicio(&eliminaciones,i->dato);
 				}
 			glist_destruir(eliminadasFinal);
 
@@ -239,17 +251,17 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla){
 				cambiadasn=eliminar_repetidos(cambiadasn);
 				GList cambiadasCorrectasn=filter(cambiadasn,esta_en_diccionario);
 				for(GList i=cambiadasCorrectasn; i!=NULL;i=i->sig){
-					sugerencias=glist_agregar_inicio(sugerencias,i->dato);
+					sugerencias=glist_agregar_inicio(&sugerencias,i->dato);
 				}
 				for(GList i=cambiadasn; i!=NULL;i=i->sig){
-					eliminadasFinal=glist_agregar_inicio(eliminadasFinal,i->dato);
+					eliminadasFinal=glist_agregar_inicio(&eliminadasFinal,i->dato);
 				}
 				glist_destruir(cambiadasn,e);
 			}
 			glist_destruir(cambiadas,e);
 			//guardo las nuevas insertadas a la distancia actual
 			for(GList i=cambiadasFinal; i!=NULL;i=i->sig){
-					cambiadas=glist_agregar_inicio(cambiadas,i->dato);
+					cambiadas=glist_agregar_inicio(&cambiadas,i->dato);
 				}
 			glist_destruir(cambiadasFinal);
 
@@ -264,7 +276,7 @@ GList posibles_intercambios(wchar_t *palabra,int largoPalabra){
 	for (int i = 0, j=1; j < largoPalabra; ++i,j++)
 	{
 		wchar_t palabraResultante=intercambia_adyacentes(palabra,largoPalabra,i,j);
-		resultado=glist_agregar_inicio(palabraResultante,&resultado);
+		resultado=glist_agregar_inicio(&resultado,palabraResultante);
 	}
 	return resultado;
 }
@@ -278,14 +290,14 @@ GList posibles_inserciones(wchar_t *palabra,int largoPalabra,wchar_t alfabeto[])
 		temp[0]=alfabeto[i];
 		temp++;
 		wcsncpy(temp, palabra, largoPalabra);
-		resultado=glist_agregar_inicio(salida,&resultado);
+		resultado=glist_agregar_inicio(&resultado,salida);
 	}
 	//al final
 	for(int i=0;i<LARGO_ALFABETO, i++){
 		wchar_t* temp = salida;
 		temp[largoPalabra]=alfabeto[i];
 		wcsncpy(temp, palabra, largoPalabra);
-		resultado=glist_agregar_inicio(salida,&resultado);
+		resultado=glist_agregar_inicio(&resultado,salida);
 	}
 	free(salida);
 
@@ -294,7 +306,7 @@ GList posibles_inserciones(wchar_t *palabra,int largoPalabra,wchar_t alfabeto[])
 		for (int k = 0; k < LARGO_ALFABETO; ++k)
 		{
 			salida=insertar_entre_pares(palabra, largoPalabra, i,j,alfabeto[k]);
-			resultado=glist_agregar_inicio(salida,&resultado);
+			resultado=glist_agregar_inicio(&resultado,salida);
 
 		}
 	}
@@ -308,7 +320,7 @@ GList posibles_eliminaciones(wchar_t *palabra,int largoPalabra){
 	for (int i = 0; i < largoPalabra; ++i)
 	{
 		salida=elimina_caracter(palabra,largoPalabra,i);
-		resultado=glist_agregar_inicio(salida,&resultado);
+		resultado=glist_agregar_inicio(&resultado,salida);
 	}
 
 	return resultado;
@@ -321,7 +333,7 @@ GList posibles_cambios(wchar_t *palabra,int largoPalabra,wchar_t alfabeto[]){
 		for (int j = 0; j < LARGO_ALFABETO; ++j)
 		{
 			salida=cambia_caracter(palabra,largoPalabra,i,alfabeto[j]);
-			resultado=glist_agregar_inicio(salida,&resultado);
+			resultado=glist_agregar_inicio(&resultado,salida);
 
 		}
 	}
@@ -336,8 +348,8 @@ GList separadas_correctas(wchar_t *palabra,int largoPalabra){
 		separar_palabras(palabra,largoPalabra,&salida1,&salida2,i);
 		if(esta_en_diccionario(salida1)&&esta_en_diccionario(salida2))
 		{
-			resultado=glist_agregar_inicio(salida1,&resultado);
-			resultado=glist_agregar_inicio(salida2,&resultado);
+			resultado=glist_agregar_inicio(&resultado,salida1);
+			resultado=glist_agregar_inicio(&resultado, salida2);
 		}
 	}
 
