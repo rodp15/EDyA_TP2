@@ -35,7 +35,7 @@ void* glist_buscar(void *lista, void *dato) {
   }
 }
 
-void glist_eliminar_nodo(void **lista, void *dato){
+void glist_eliminar_dato(void **lista, void *dato){
   // TODO revisar esta funcion
   GList *inicioLEReal = (GList*)lista;
   
@@ -75,7 +75,9 @@ void glist_destruir(GList lista, Eliminadora e) {
     free(nodoAEliminar);
   }
 }
+GList glist_borrar_nodo(GList lista, GList nodoAEliminar){
 
+}
 int glist_size(GList lista){
 	int cant=0;
 	for (GNodo *nodo = lista; nodo != NULL; cant++, nodo = nodo->sig);
@@ -83,7 +85,17 @@ int glist_size(GList lista){
 	return cant;
 }
 
-/*
+GList eliminar_repetidos(GList lista){
+  for (GNodo *nodo = lista; nodo != NULL; cant++, nodo = nodo->sig){
+    for (GNodo *nodoActual = nodo->sig; nodoActual!=NULL; nodoActual=nodoActual-sig)
+    {
+      if(wcscmp(nodo->dato, nodoActual->dato)==0){
+        glist_eliminar_nodo(nodoActual,FAK);
+      }
+    }
+  }
+}
+
 GList filter(GList lista, Predicado f, Copia c){
   GList listaRetorno=glist_crear();
   for(GList i=lista;i != NULL;i=i->sig){
@@ -95,5 +107,5 @@ GList filter(GList lista, Predicado f, Copia c){
 
   return listaRetorno;
 }
-*/
+
 
