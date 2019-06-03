@@ -85,16 +85,23 @@ int glist_size(GList lista){
 	return cant;
 }
 
-GList eliminar_repetidos(GList lista){
-  for (GNodo *nodo = lista; nodo != NULL; cant++, nodo = nodo->sig){
+void eliminar_repetidos(GList lista, Predicado valoresIguales, Copia c){
+  GList resultado;
+  for (; lista != NULL; lista = lista->sig){
+    /*
     for (GNodo *nodoActual = nodo->sig; nodoActual!=NULL; nodoActual=nodoActual-sig)
     {
       if(wcscmp(nodo->dato, nodoActual->dato)==0){
         glist_eliminar_nodo(nodoActual,FAK);
       }
-    }
+    }*/
+
+    resultado=filter(lista->sig,valoresIguales, c);
+    free(lista->sig);
+    lista->sig = resultado;
   }
 }
+
 
 GList filter(GList lista, Predicado f, Copia c){
   GList listaRetorno=glist_crear();
@@ -108,4 +115,23 @@ GList filter(GList lista, Predicado f, Copia c){
   return listaRetorno;
 }
 
+void* copiar_palabra(void* dato){
+  void* copia= malloc(sizeof(wchar_t)*(wcslen(((wchar_t*)dato)))+1);
+   
+}
 
+int main(){
+  GList l=glist_crear();
+  int* j = malloc(sizeof(int));;
+  for (int i = 0; i < 5; ++i)
+  {
+    *j=i;
+    l=glist_agregar_inicio(l,(*void)(j));
+    l=glist_agregar_inicio(l,(*void)(j));
+  }
+
+  for (GList i=l; i != NULL; i=i->sig)
+  {
+    printf("%d\n",*((*int)(l->dato)));
+  }
+}
