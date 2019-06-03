@@ -9,11 +9,14 @@ typedef struct _GNodo{
 typedef GNodo *GList;
 
 typedef int (*Predicado) (void* dato);
+typedef int (*Predicado2) (void* dato1, void* dato2);
 typedef void* (*Copia) (void*);
 typedef void (*Eliminadora) (GList);
 typedef void (*Escritora) (FILE* fp, GList i);
 
 GList filter(GList lista, Predicado f, Copia c);
+
+GList filter2(GList lista, Predicado2 f, Copia c, void* dato);
 
 /**
  * Devuelve una lista vacía.
