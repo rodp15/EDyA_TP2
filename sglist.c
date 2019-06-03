@@ -18,13 +18,6 @@ void glist_agregar_inicio(void **lista, void *p) {
   *inicioLE = nuevoNodo;
 }
 
-int valoresIguales(void *valor1, void *valor2){
-  if(wcscmp( (wchar_t*)valor1, (wchar_t*)valor2 ) == 0)
-    return 1;
-
-  return 0;
-}
-
 void* glist_buscar(void *lista, void *dato) {
   GList inicioLE = (GList)lista;
   for(; !glist_vacia(inicioLE) && !valoresIguales(inicioLE->dato, dato); inicioLE = inicioLE->sig);
@@ -82,10 +75,6 @@ GList glist_borrar_nodo(GList lista, GList nodoAEliminar){
 }
 */
 
-void borrarint(GList nodo){
-  free(nodo->dato);
-}
-
 int glist_size(GList lista){
 	int cant=0;
 	for (GNodo *nodo = lista; nodo != NULL; cant++, nodo = nodo->sig);
@@ -102,7 +91,6 @@ void eliminar_repetidos(GList lista, Predicado2 valoresIguales, Copia c, Elimina
   }
 }
 
-
 GList filter(GList lista, Predicado f, Copia c){
   GList listaRetorno=glist_crear();
   for(GList i=lista;i != NULL;i=i->sig){
@@ -115,7 +103,6 @@ GList filter(GList lista, Predicado f, Copia c){
   return listaRetorno;
 }
 
-// TODO, ver que hacer con esto
 GList filter2(GList lista, Predicado2 f, Copia c, void* dato){
   GList listaRetorno=glist_crear();
   for(GList i=lista; i != NULL; i=i->sig){
@@ -128,13 +115,11 @@ GList filter2(GList lista, Predicado2 f, Copia c, void* dato){
   return listaRetorno;
 }
 
-// TODO ver que ande copiar_palabra
 void* copiar_palabra(void* dato){
   void* copia= malloc(sizeof(wchar_t)*(wcslen(((wchar_t*)dato)))+1);
   wcscpy(copia,dato);
   return copia;
 }
-
 
 void* copiar_int(void* dato){
   void* copia = malloc(sizeof(int));
@@ -142,10 +127,20 @@ void* copiar_int(void* dato){
   return copia;
 }
 
+int valoresIguales(void *valor1, void *valor2){
+  if(wcscmp( (wchar_t*)valor1, (wchar_t*)valor2 ) == 0)
+    return 1;
+
+  return 0;
+}
+
 int intNoIguales(void* dato1, void* dato2){
   return (*((int*)dato1)) != (*((int*)dato2));
 }
 
+void borrarint(GList nodo){
+  free(nodo->dato);
+}
 
 int main(){
   GList l = glist_crear();
