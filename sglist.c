@@ -133,10 +133,15 @@ void borrarint(GList nodo){
 }
 
 GList concatenar_listas(GList lista1, GList lista2){
-  GList final1=lista1;
-  for(;final1->sig!=NULL;final1=final1->sig);
-  final1->sig=lista2;
-  return lista1;
+  GList referenciaOrigen = lista1;
+
+  if(lista1 == NULL){
+    return lista2;
+  }
+  
+  for(; lista1->sig != NULL ; lista1 = lista1->sig);
+  lista1->sig = lista2;
+  return referenciaOrigen;
 }
 
 int main(){
@@ -150,11 +155,13 @@ int main(){
     *j=i;
     *k=i;
     glist_agregar_inicio(((void**)&l),(void*)(j));
-    glist_agregar_inicio(((void**)&l),(void*)(k));
-    glist_agregar_inicio(((void**)&l2),(void*)(j));
+    //glist_agregar_inicio(((void**)&l),(void*)(k));
+    //glist_agregar_inicio(((void**)&l2),(void*)(j));
     glist_agregar_inicio(((void**)&l2),(void*)(k));
   }
 
+
+  /*
   for (GList i = l; i != NULL; i=i->sig)
   {
     printf("orig 1: %d\n",*((int*)(i->dato)));
@@ -163,7 +170,8 @@ int main(){
   {
     printf("orig 2: %d\n",*((int*)(i->dato)));
   }
-
+  */
+  /*
   Copia c = &copiar_int;
 
   Predicado2 p = &intNoIguales;
@@ -171,14 +179,17 @@ int main(){
   Eliminadora e = &borrarint;
 
   eliminar_repetidos(l,p,c,e);
-
+  
   for (GList i = l; i != NULL; i=i->sig)
   {
     printf("sin repetidos 1:%d\n",*((int*)(i->dato)));
   }
+  */
+
+
   //CORREGIR
-  GList concatenadas=concatenar_listas(l,l2);
-  for (GList i = concatenadas; i != NULL; i=i->sig)
+  l = concatenar_listas(l,l2);
+  for (GList i = l; i != NULL; i = i->sig)
   {
     printf("concatenadas: %d\n",*((int*)(i->dato)));
   }
