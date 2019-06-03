@@ -66,7 +66,7 @@ void leer_palabras(char *archivoEntrada){
 		wprintf(L"linea actual: %s \n", linea);
 		/*if(!esta_en_diccionario(linea)){
 			buscar_sugerencia(linea);
-			wprintf(L"linea %ld, "%s" no esta en el diccionario \n Quizas quiso decir: ", nroLineas, linea);
+			wprintf(L"Linea %ld, "%s" no esta en el diccionario \n Quizas quiso decir: ", nroLineas, linea);
 		}*/
 
 		if(ban==1){

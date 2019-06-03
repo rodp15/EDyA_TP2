@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <wchar.h>
 #include "sglist.h"
+#include "palabras.h"
 
 int glist_vacia(GList lista) {
   return lista == NULL;
@@ -69,12 +70,6 @@ void glist_destruir(GList lista, Eliminadora e) {
   }
 }
 
-/*
-GList glist_borrar_nodo(GList lista, GList nodoAEliminar){
-
-}
-*/
-
 int glist_size(GList lista){
 	int cant=0;
 	for (GNodo *nodo = lista; nodo != NULL; cant++, nodo = nodo->sig);
@@ -115,34 +110,29 @@ GList filter2(GList lista, Predicado2 f, Copia c, void* dato){
   return listaRetorno;
 }
 
-void* copiar_palabra(void* dato){
-  void* copia= malloc(sizeof(wchar_t)*(wcslen(((wchar_t*)dato)))+1);
-  wcscpy(copia,dato);
-  return copia;
-}
-
+//esta debería ir en el main
 void* copiar_int(void* dato){
   void* copia = malloc(sizeof(int));
   *((int*)copia) = *((int*)dato);
   return copia;
 }
-
+//esta también
 int valoresIguales(void *valor1, void *valor2){
   if(wcscmp( (wchar_t*)valor1, (wchar_t*)valor2 ) == 0)
     return 1;
 
   return 0;
 }
-
+//esta también
 int intNoIguales(void* dato1, void* dato2){
   return (*((int*)dato1)) != (*((int*)dato2));
 }
-
+//esta también
 void borrarint(GList nodo){
   free(nodo->dato);
 }
 
-int main(){
+/*int main(){
   GList l = glist_crear();
   int *j, *k;
 
@@ -174,4 +164,4 @@ int main(){
     printf("%d\n",*((int*)(i->dato)));
   }
 
-}
+}*/

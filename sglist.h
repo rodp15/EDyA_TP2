@@ -46,7 +46,7 @@ void* glist_buscar(void *lista, void *dato);
 /**
  * Elimina un elemento de la lista.
  */
-void glist_eliminar_nodo(void **lista, void *dato);
+void glist_eliminar_dato(void **lista, void *dato);
 
 /**
  * cantidad de elementos de la lista.
@@ -57,3 +57,10 @@ int glist_size(GList lista);
  * Compara el dato de un nodo contra otro. Si son iguales retorna 1 sino 0.
  */
 int valoresIguales(void *valor1, void *valor2);
+
+/*
+Elimina valores repetidos de la lista, por lo que la ocurrencia de cada valor es única
+*/
+void eliminar_repetidos(GList lista, Predicado2 valoresIguales, Copia c, Eliminadora e);
+
+

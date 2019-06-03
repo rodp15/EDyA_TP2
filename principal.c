@@ -127,29 +127,34 @@ int main() {
 
 GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla){
 
-	int d=1,len=wcslen(palabra);
+	int len=wcslen(palabra);
 	wchar_t alfabeto[34]="abcdefghijklmnñopqrstuvwxyzáéíóúöü";
-	GList sugerencias=glist_crear();
+	GList sugerencias;
 
 	//busco TODAS las posibles a distancia 1
 	GList intercambiadas=posibles_intercambios(palabra,len);
-	intercambiadas=eliminar_repetidos(intercambiadas);
-	sugerencias=filter(intercambiadas, esta_en_diccionario);
+	intercambiadas=eliminar_repetidos(intercambiadas,palabras_iguales,c,e);
+	sugerencias=filter(intercambiadas, esta_en_diccionario,c);
 
 	GList insertadas=posibles_inserciones(palabra,len,alfabeto);
-	insertadas=eliminar_repetidos(insertadas);
-	sugerencias=concatenar_listas(sugerencias,filter(insertadas, esta_en_diccionario, copiar_nodo));
+	insertadas=eliminar_repetidos(insertadas,palabras_iguales,c,e);
+	GList insertadasCorrectas=filter(insertadas, esta_en_diccionario, copiar_nodo);
+	sugerencias=concatenar_listas(sugerencias,insertadasCorrectas);
 
 	GList eliminaciones=posibles_eliminaciones(palabra,len);
-	eliminaciones=eliminar_repetidos(eliminaciones);
-	sugerencias=concatenar_listas(sugerencias,filter(eliminaciones, esta_en_diccionario, copiar_nodo));
+	eliminaciones=eliminar_repetidos(eliminaciones,palabras_iguales,c,e);
+	GList eliminadasCorrectas=filter(eliminaciones, esta_en_diccionario, copiar_nodo);
+	sugerencias=concatenar_listas(sugerencias,eliminadasCorrectas);
 
 
 	GList cambiadas=posibles_cambios(palabra,len,alfabeto);
-	cambiadas=eliminar_repetidos(cambiadas);
-	sugerencias=concatenar_listas(sugerencias,filter(cambiadas, esta_en_diccionario, copiar_nodo));
+	cambiadas=eliminar_repetidos(cambiadas,palabras_iguales,c,e);
+	GList cambiadasCorrectas=filter(cambiadas, esta_en_diccionario, copiar_nodo);
+	sugerencias=concatenar_listas(sugerencias,cambiadasCorrectas);
 
-	sugerencias=concatenar_listas(sugerencias, separadas_correctas(palabra,len));
+	GList separadasCorrectas=separadas_correctas(palabra,len);
+	separadasCorrectas=eliminar_repetidos(separadasCorrectas,palabras_iguales,c,e);
+	sugerencias=concatenar_listas(sugerencias,separadasCorrectas);
 
 	if(glist_size(sugerencias)>=5){
 		return sugerencias;
@@ -158,53 +163,90 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla){
 	else{
 		while(glist_size(sugerencias)<CANT_MIN_SUGERENCIAS){
 
+			GList intercambiadasFinal=glist_crear();
+			//estos 4 for se pueden modularizar si hago que todas las funciones tomen el alfabeto, aunque no lo necesiten
 			for (GNodo *nodo = intercambiadas; nodo != NULL && glist_size(sugerencias)<CANT_MIN_SUGERENCIAS; nodo = nodo->sig)
 			{
-				GList intercambiadas2=glist_crear();
-				intercambiadas2=posibles_intercambios(nodo->dato,wcslen(nodo->dato),alfabeto);
-				intercambiadas2=eliminar_repetidos(intercambiadas2);
-				sugerencias=concatenar_listas(sugerencias,filter(intercambiadas2,esta_en_diccionario));
-				GList intercambiadasFinal=glist_crear();
-				intercambiadasFinal=concatenar_listas(intercambiadasFinal,intercambiadas2);
+				GList intercambiadasn=posibles_intercambios(nodo->dato,wcslen(nodo->dato));
+				intercambiadasn=eliminar_repetidos(intercambiadasn,palabras_iguales,c,e);
+				GList intercambiadasnCorrectas=filter(intercambiadasn,esta_en_diccionario);
+				for(GList i=intercambiadasnCorrectas; i!=NULL;i=i->sig){
+					sugerencias=glist_agregar_inicio(sugerencias,i->dato);
+				}
+				for(GList i=intercambiadasn; i!=NULL;i=i->sig){
+					intercambiadasFinal=glist_agregar_inicio(intercambiadasFinal,i->dato);
+				}
+				glist_destruir(intercambiadasn,e);
 			}
-			glist_destruir(intercambiadas);
-			intercambiadas=intercambiadasFinal;
+			glist_destruir(intercambiadas,e);
+			//guardo las nuevas intercambiadas a la distancia actual
+			for(GList i=intercambiadasFinal; i!=NULL;i=i->sig){
+					intercambiadas=glist_agregar_inicio(intercambiadas,i->dato);
+				}
+			glist_destruir(intercambiadasFinal,e);
 
+			GList insertadasFinal=glist_crear();
 			for (GNodo *nodo = insertadas; nodo != NULL && glist_size(sugerencias)<CANT_MIN_SUGERENCIAS; nodo = nodo->sig)
 			{
-				GList insertadas2=glist_crear();
-				insertadas2=posibles_inserciones(nodo->dato,wcslen(nodo->dato),alfabeto);
-				insertadas2=eliminar_repetidos(insertadas2);
-				sugerencias=concatenar_listas(sugerencias,filter(insertadas2,esta_en_diccionario));
-				GList insertadasFinal=glist_crear();
-				insertadasFinal=concatenar_listas(insertadasFinal,insertadas2);
+				GList insertadasn=posibles_inserciones(nodo->dato,wcslen(nodo->dato),alfabeto);
+				insertadasn=eliminar_repetidos(insertadasn,palabras_iguales,c,e);
+				GList insertadasCorrectasn=filter(insertadasn,esta_en_diccionario);
+				for(GList i=insertadasnCorrectasn; i!=NULL;i=i->sig){
+					sugerencias=glist_agregar_inicio(sugerencias,i->dato);
+				}
+				for(GList i=insertadasn; i!=NULL;i=i->sig){
+					insertadasFinal=glist_agregar_inicio(insertadasFinal,i->dato);
+				}
+				glist_destruir(insertadasn,e);
 			}
-			glist_destruir(insertadas);
-			insertadas=insertadasFinal;
+			glist_destruir(insertadas,e);
+			//guardo las nuevas insertadas a la distancia actual
+			for(GList i=insertadasFinal; i!=NULL;i=i->sig){
+					insertadas=glist_agregar_inicio(insertadas,i->dato);
+				}
+			glist_destruir(insertadasFinal,e);
 
+			GList eliminadasFinal=glist_crear();
 			for (GNodo *nodo = eliminaciones; nodo != NULL && glist_size(sugerencias)<CANT_MIN_SUGERENCIAS; nodo = nodo->sig)
 			{
-				GList eliminaciones2=glist_crear();
-				eliminaciones2=posibles_eliminaciones(nodo->dato,wcslen(nodo->dato),alfabeto);
-				eliminaciones2=eliminar_repetidos(eliminaciones2);
-				sugerencias=concatenar_listas(sugerencias,filter(eliminaciones2,esta_en_diccionario));
-				GList eliminacionesFinal=glist_crear();
-				eliminacionesFinal=concatenar_listas(eliminacionesFinal,eliminaciones2);
+				GList eliminacionesn=posibles_eliminaciones(nodo->dato,wcslen(nodo->dato));
+				eliminacionesn=eliminar_repetidos(eliminacionesn);
+				GList eliminadasCorrectasn=filter(eliminacionesn,esta_en_diccionario);
+				for(GList i=eliminadasCorrectasn; i!=NULL;i=i->sig){
+					sugerencias=glist_agregar_inicio(sugerencias,i->dato);
+				}
+				for(GList i=eliminacionesn; i!=NULL;i=i->sig){
+					eliminadasFinal=glist_agregar_inicio(eliminadasFinal,i->dato);
+				}
+				glist_destruir(eliminacionesn,e);
 			}
-			glist_destruir(eliminaciones);
-			eliminaciones=eliminacionesFinal;
+			glist_destruir(eliminaciones,e);
+			//guardo las nuevas insertadas a la distancia actual
+			for(GList i=eliminadasFinal; i!=NULL;i=i->sig){
+					eliminaciones=glist_agregar_inicio(eliminaciones,i->dato);
+				}
+			glist_destruir(eliminadasFinal);
 
+			GList cambiadasFinal=glist_crear();
 			for (GNodo *nodo = cambiadas; nodo != NULL && glist_size(sugerencias)<CANT_MIN_SUGERENCIAS; nodo = nodo->sig)
 			{
-				GList cambiadas2=glist_crear();
-				cambiadas2=posibles_cambios(nodo->dato,wcslen(nodo->dato),alfabeto);
-				cambiadas2=eliminar_repetidos(cambiadas2);
-				sugerencias=concatenar_listas(sugerencias,filter(cambiadas2,esta_en_diccionario));
-				GList cambiadasFinal=glist_crear();
-				cambiadasFinal=concatenar_listas(cambiadasFinal,cambiadas2);
+				GList cambiadasn=posibles_cambios(nodo->dato,wcslen(nodo->dato),alfabeto);
+				cambiadasn=eliminar_repetidos(cambiadasn);
+				GList cambiadasCorrectasn=filter(cambiadasn,esta_en_diccionario);
+				for(GList i=cambiadasCorrectasn; i!=NULL;i=i->sig){
+					sugerencias=glist_agregar_inicio(sugerencias,i->dato);
+				}
+				for(GList i=cambiadasn; i!=NULL;i=i->sig){
+					eliminadasFinal=glist_agregar_inicio(eliminadasFinal,i->dato);
+				}
+				glist_destruir(cambiadasn,e);
 			}
-			glist_destruir(cambiadas);
-			cambiadas=cambiadasFinal;
+			glist_destruir(cambiadas,e);
+			//guardo las nuevas insertadas a la distancia actual
+			for(GList i=cambiadasFinal; i!=NULL;i=i->sig){
+					cambiadas=glist_agregar_inicio(cambiadas,i->dato);
+				}
+			glist_destruir(cambiadasFinal);
 
 		}
 	}

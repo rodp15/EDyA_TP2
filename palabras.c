@@ -4,18 +4,15 @@
 #include "palabras.h"
 #include <assert.h>
 #include <stdio.h>
+#include <wchar.h>
 
 void eliminar_palabra(GList nodoAEliminar){
-  char* aux= nodoAEliminar->dato;
+  wchar_t* aux= nodoAEliminar->dato;
   free(aux);
 }
 
-void* copiar_palabra(void* p){
-    char* nuevap = malloc(sizeof(char)*(strlen((char*) p)+1));
-
-    assert(nuevap!=NULL);
-
-    strcpy(nuevap, ((char*) p));
-
-    return nuevap;
+void* copiar_palabra(void* dato){
+  void* copia= malloc(sizeof(wchar_t)*(wcslen(((wchar_t*)dato)))+1);
+  wcscpy(copia,dato);
+  return copia;
 }
