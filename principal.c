@@ -92,7 +92,7 @@ int cargarArchivo(TablaHash *tabla, const char* nombreArchivo){
 	}
 	return i;
 }
-
+/*
 int main() {
 	// IMPORTANTE: Cambie la codificacion del archivo a windows 1252. Esto puede hacer q en linux no funque. Aldu
 	setlocale(LC_CTYPE, "");
@@ -109,7 +109,7 @@ int main() {
 	TablaHash *MiTabla = tablahash_crear(palabras, fh, fi, manejoColisiones);
 
 	cargarArchivo(MiTabla, "listado-general.txt");
-	/*
+	
 	// Testeado de la funcion hash
 	int cant_nodos, max = 0, cant_cero=0, cuenta_total = 0, cantidadColisiones = 0;
 	for(int i = 0; i < palabras; i++){
@@ -127,7 +127,8 @@ int main() {
 		cuenta_total+=cant_nodos;
 	}
 	printf("Maximas colisiones:%d\nCantidad de casillas sin ocupar:%d\nCheck que se hayan insertado todas las palabras:%d\nCasillas con colisiones:%d\n", max, cant_cero, cuenta_total, cantidadColisiones);
-	*/
+	*/ /*
+
 	Copia c = &copiar_palabra;
 
   	Predicado p = &esta_en_diccionario;
@@ -141,7 +142,7 @@ int main() {
 		wprintf(L"sugerencia: %s",((wchar_t*)i->dato));
 	}
 	return 0;
-}
+}*/
 
 GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predicado2 palabras_iguales, Eliminadora e, Copia c){
 

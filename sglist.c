@@ -91,7 +91,7 @@ GList filter(GList lista, Predicado f, Copia c, TablaHash* tabla){
   for(GList i=lista;i != NULL;i=i->sig){
     if(f(tabla, i->dato)){
       void *nuevoNodo=c(i->dato);
-      /glist_agregar_inicio(((void**)&listaRetorno),nuevoNodo);
+      glist_agregar_inicio(((void**)&listaRetorno),nuevoNodo);
     }
   }
 
