@@ -8,6 +8,7 @@
 #include <string.h>
 #include <locale.h>
 #include <wchar.h>
+#include <assert.h>
 
 #define CANT_MIN_SUGERENCIAS 5
 #define LARGO_ALFABETO 34
@@ -92,7 +93,7 @@ int cargarArchivo(TablaHash *tabla, const char* nombreArchivo){
 	}
 	return i;
 }
-/*
+
 int main() {
 	// IMPORTANTE: Cambie la codificacion del archivo a windows 1252. Esto puede hacer q en linux no funque. Aldu
 	setlocale(LC_CTYPE, "");
@@ -110,6 +111,7 @@ int main() {
 
 	cargarArchivo(MiTabla, "listado-general.txt");
 	
+	/*
 	// Testeado de la funcion hash
 	int cant_nodos, max = 0, cant_cero=0, cuenta_total = 0, cantidadColisiones = 0;
 	for(int i = 0; i < palabras; i++){
@@ -127,7 +129,7 @@ int main() {
 		cuenta_total+=cant_nodos;
 	}
 	printf("Maximas colisiones:%d\nCantidad de casillas sin ocupar:%d\nCheck que se hayan insertado todas las palabras:%d\nCasillas con colisiones:%d\n", max, cant_cero, cuenta_total, cantidadColisiones);
-	*/ /*
+	*/
 
 	Copia c = &copiar_palabra;
 
@@ -135,14 +137,16 @@ int main() {
 
   	Predicado2 p2 = &notValoresIguales;
 
+	Eliminadora e = &eliminar_palabra;
+	
+	GList sugerencias=buscar_sugerencias(L"ohla", MiTabla,p,p2,e,c);
 
-  	Eliminadora e = &eliminar_palabra;
-	GList sugerencias=buscar_sugerencias(L"aolh", MiTabla,p,p2,e,c);
 	for(GList i=sugerencias;i!=NULL;i=i->sig){
-		wprintf(L"sugerencia: %s",((wchar_t*)i->dato));
+		wprintf(L"sugerencia: %s\n",((wchar_t*)i->dato));
 	}
+
 	return 0;
-}*/
+}
 
 GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predicado2 palabras_iguales, Eliminadora e, Copia c){
 
@@ -165,7 +169,6 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 	GList eliminadasCorrectas=filter(eliminaciones, esta_en_diccionario, c, tabla);
 	sugerencias=concatenar_listas(sugerencias,eliminadasCorrectas);
 
-
 	GList cambiadas=posibles_cambios(palabra,len,alfabeto);
 	eliminar_repetidos(cambiadas,palabras_iguales,c,e);
 	GList cambiadasCorrectas=filter(cambiadas, esta_en_diccionario, c, tabla);
@@ -175,15 +178,17 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 	eliminar_repetidos(separadasCorrectas,palabras_iguales,c,e);
 	sugerencias=concatenar_listas(sugerencias,separadasCorrectas);
 
+	return sugerencias;
+
 	if(glist_size(sugerencias)>=5){
 		return sugerencias;
-	}
-	//busco en la siguientes distancias
-	else{
+	} else {
+		//busco en la siguientes distancias
+
 		while(glist_size(sugerencias)<CANT_MIN_SUGERENCIAS){
 
-			GList intercambiadasFinal=glist_crear();
 			//estos 4 for se pueden modularizar si hago que todas las funciones tomen el alfabeto, aunque no lo necesiten
+			GList intercambiadasFinal=glist_crear();
 			for (GNodo *nodo = intercambiadas; nodo != NULL && glist_size(sugerencias)<CANT_MIN_SUGERENCIAS; nodo = nodo->sig)
 			{
 				GList intercambiadasn=posibles_intercambios(nodo->dato,wcslen(nodo->dato));
@@ -203,6 +208,8 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 					glist_agregar_inicio(((void**)&intercambiadas),i->dato);
 				}
 			glist_destruir(intercambiadasFinal,e);
+
+
 
 			GList insertadasFinal=glist_crear();
 			for (GNodo *nodo = insertadas; nodo != NULL && glist_size(sugerencias)<CANT_MIN_SUGERENCIAS; nodo = nodo->sig)
@@ -225,6 +232,9 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 				}
 			glist_destruir(insertadasFinal,e);
 
+
+
+
 			GList eliminadasFinal=glist_crear();
 			for (GNodo *nodo = eliminaciones; nodo != NULL && glist_size(sugerencias)<CANT_MIN_SUGERENCIAS; nodo = nodo->sig)
 			{
@@ -246,6 +256,8 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 				}
 			glist_destruir(eliminadasFinal,e);
 
+
+
 			GList cambiadasFinal=glist_crear();
 			for (GNodo *nodo = cambiadas; nodo != NULL && glist_size(sugerencias)<CANT_MIN_SUGERENCIAS; nodo = nodo->sig)
 			{
@@ -266,7 +278,6 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 					glist_agregar_inicio(((void**)&cambiadas),i->dato);
 				}
 			glist_destruir(cambiadasFinal,e);
-
 		}
 	}
 
