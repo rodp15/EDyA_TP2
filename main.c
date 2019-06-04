@@ -64,10 +64,11 @@ void leer_palabras(char *archivoEntrada){
 		linea[largoLinea] = '\0';		
 		wprintf(L"tamaño linea: %ld\n",largoLinea );
 		wprintf(L"linea actual: %s \n", linea);
-		/*if(!esta_en_diccionario(linea)){
-			buscar_sugerencia(linea);
-			wprintf(L"Linea %ld, "%s" no esta en el diccionario \n Quizas quiso decir: ", nroLineas, linea);
-		}*/
+		
+		if(!esta_en_diccionario(linea)){
+			buscar_sugerencias(linea);
+			wprintf(L"Linea %ld, %s no esta en el diccionario \n Quizas quiso decir: ", nroLineas, linea);
+		}
 
 		if(ban==1){
 			nroLineas++;

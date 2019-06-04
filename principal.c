@@ -1,24 +1,4 @@
-#include "tablahash.h"
-#include "sglist.h"
-#include "tecnicasaux.h"
-#include "palabras.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
-#include <locale.h>
-#include <wchar.h>
-#include <assert.h>
-
-#define CANT_MIN_SUGERENCIAS 5
-#define LARGO_ALFABETO 34
-
-GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predicado2 palabras_iguales, Eliminadora e, Copia c);
-GList posibles_intercambios(wchar_t *palabra,int largoPalabra);
-GList posibles_inserciones(wchar_t *palabra,int largoPalabra,wchar_t alfabeto[]);
-GList posibles_eliminaciones(wchar_t *palabra,int largoPalabra);
-GList posibles_cambios(wchar_t *palabra,int largoPalabra,wchar_t alfabeto[]);
-GList separadas_correctas(TablaHash* tabla, wchar_t *palabra,int largoPalabra);
+#include "principal.h"
 
 int esta_en_diccionario(TablaHash* tabla, void* palabra){
 	return (tablahash_buscar(tabla,palabra)!=NULL);
@@ -94,8 +74,8 @@ int cargarArchivo(TablaHash *tabla, const char* nombreArchivo){
 	return i;
 }
 
-int main() {
-	// IMPORTANTE: Cambie la codificacion del archivo a windows 1252. Esto puede hacer q en linux no funque. Aldu
+int main(int argc,  char **argv) {
+
 	setlocale(LC_CTYPE, "");
 
 	unsigned palabras = cantidadPalabras("listado-general.txt");
@@ -110,26 +90,6 @@ int main() {
 	TablaHash *MiTabla = tablahash_crear(palabras, fh, fi, manejoColisiones);
 
 	cargarArchivo(MiTabla, "listado-general.txt");
-	
-	/*
-	// Testeado de la funcion hash
-	int cant_nodos, max = 0, cant_cero=0, cuenta_total = 0, cantidadColisiones = 0;
-	for(int i = 0; i < palabras; i++){
-		cant_nodos = glist_size((GList)MiTabla->tabla[i].inicioLE);
-		if(cant_nodos > max)
-			max = cant_nodos;
-
-		if(cant_nodos == 0)
-			cant_cero++;
-
-		if(cant_nodos > 1){
-			cantidadColisiones++;
-		}
-
-		cuenta_total+=cant_nodos;
-	}
-	printf("Maximas colisiones:%d\nCantidad de casillas sin ocupar:%d\nCheck que se hayan insertado todas las palabras:%d\nCasillas con colisiones:%d\n", max, cant_cero, cuenta_total, cantidadColisiones);
-	*/
 
 	Copia c = &copiar_palabra;
 
@@ -138,14 +98,19 @@ int main() {
   	Predicado2 p2 = &notValoresIguales;
 
 	Eliminadora e = &eliminar_palabra;
-	
-	GList sugerencias=buscar_sugerencias(L"ohla", MiTabla,p,p2,e,c);
 
-	for(GList i=sugerencias;i!=NULL;i=i->sig){
-		wprintf(L"sugerencia: %s\n",((wchar_t*)i->dato));
-	}
+	char *archivoEntrada=malloc(sizeof(char) * 30), *archivoSalida=malloc(sizeof(char) * 30);
 
-	return 0;
+    strcpy(archivoEntrada, argv[1]);
+    strcpy(archivoSalida, argv[2]);
+    wprintf(L"%s %s \n", archivoEntrada, archivoSalida);
+    wprintf(L"empiezo a leer_palabras:\n");
+    leer_palabras(archivoEntrada, MiTabla, p, p2, e, c);
+    wprintf(L"termino de leer_palabras\n");
+
+    free(archivoEntrada);
+
+    return 0;
 }
 
 GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predicado2 palabras_iguales, Eliminadora e, Copia c){
@@ -178,8 +143,6 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 	eliminar_repetidos(separadasCorrectas,palabras_iguales,c,e);
 	sugerencias=concatenar_listas(sugerencias,separadasCorrectas);
 
-	return sugerencias;
-
 	if(glist_size(sugerencias)>=5){
 		return sugerencias;
 	} else {
@@ -201,6 +164,7 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 					glist_agregar_inicio(((void**)&intercambiadasFinal),i->dato);
 				}
 				glist_destruir(intercambiadasn,e);
+				glist_destruir(intercambiadasnCorrectas, e);
 			}
 			glist_destruir(intercambiadas,e);
 			//guardo las nuevas intercambiadas a la distancia actual
@@ -224,6 +188,7 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 					glist_agregar_inicio(((void**)&insertadasFinal),i->dato);
 				}
 				glist_destruir(insertadasn,e);
+				glist_destruir(insertadasCorrectasn, e);
 			}
 			glist_destruir(insertadas,e);
 			//guardo las nuevas insertadas a la distancia actual
@@ -248,6 +213,7 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 					glist_agregar_inicio(((void**)&eliminadasFinal),i->dato);
 				}
 				glist_destruir(eliminacionesn,e);
+				glist_destruir(eliminadasCorrectasn, e);
 			}
 			glist_destruir(eliminaciones,e);
 			//guardo las nuevas insertadas a la distancia actual
@@ -271,6 +237,7 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 					glist_agregar_inicio(((void**)&eliminadasFinal),i->dato);
 				}
 				glist_destruir(cambiadasn,e);
+				glist_destruir(cambiadasCorrectasn, e);
 			}
 			glist_destruir(cambiadas,e);
 			//guardo las nuevas insertadas a la distancia actual
@@ -338,6 +305,7 @@ GList posibles_eliminaciones(wchar_t *palabra,int largoPalabra){
 
 	return resultado;
 }
+
 GList posibles_cambios(wchar_t *palabra,int largoPalabra,wchar_t alfabeto[]){
 	wchar_t *salida;
 	GList resultado=glist_crear();
@@ -353,6 +321,7 @@ GList posibles_cambios(wchar_t *palabra,int largoPalabra,wchar_t alfabeto[]){
 
 	return resultado;
 }
+
 GList separadas_correctas(TablaHash* tabla,wchar_t *palabra,int largoPalabra){
 	GList resultado=glist_crear();
 	wchar_t *salida1, *salida2;
@@ -367,4 +336,69 @@ GList separadas_correctas(TablaHash* tabla,wchar_t *palabra,int largoPalabra){
 	}
 
 	return resultado;
+}
+
+void leer_palabras(char *archivoEntrada, TablaHash *tabla, Predicado p, Predicado2 p2, Eliminadora e, Copia c){
+	FILE* fp = fopen(archivoEntrada, "r");
+	assert(fp != NULL);
+	wchar_t auxC;
+	wchar_t linea[100];
+	int ban=0, largoLinea, nroLineas=1;
+	
+	//”:”, ”;”, ”,”, ”.”, ”?”, ”!”.
+	while( (fwscanf(fp, L"%[^' '\r\n:;,.?!]", linea)) == 1 ){
+		// Se que el fwscanf se cruzo un caracter de terminacion y no lo leyo,
+		// asique lo leemos para descartarlo.
+		auxC = fgetwc(fp);
+		//wprintf(L"cant lineas: %ld \n", nroLineas);
+
+		if(es_fin_linea(auxC)){
+			ban=1;
+			//wprintf(L"ahora viene la ultima palabra de la linea: %ld\n",ban);
+			// TODO Aca podes incrementar la cuenta de en que linea estas aldu.
+		}
+
+		// Luego leemos caracteres hasta cruzarnos con uno que no sea de terminacion de palabra.
+		GList sugerencias, i;
+		while(es_simbolo(auxC)){
+			auxC = fgetwc(fp);
+		}
+		// Hacemos un ungetc para que en la proxima leida del archivo, este caracter que no es de terminacion de palabra
+		// sea leido.
+		ungetwc(auxC, fp);
+
+		largoLinea = wcslen(linea);
+		linea[largoLinea] = '\0';		
+		//wprintf(L"tamaño linea: %ld\n",largoLinea );
+		//wprintf(L"linea actual: %s \n", linea);
+		
+		if(!esta_en_diccionario(tabla, linea)){
+			sugerencias = buscar_sugerencias(linea, tabla, p, p2, e, c);
+			wprintf(L"Linea %ld, %s no esta en el diccionario \nQuizas quiso decir: ", nroLineas, linea);
+			for(i = sugerencias; i->sig != NULL; i = i->sig){
+				wprintf(L"%s, ", (wchar_t*)i->dato);
+			}
+			wprintf(L"%s\n",(wchar_t*)i->dato);
+		}
+
+		glist_destruir(sugerencias, e);
+
+		if(ban==1){
+			nroLineas++;
+			//wprintf(L"CANT lineas: %ld \n", nroLineas);
+			ban=0;
+		}
+
+	}
+	
+	fclose(fp);
+}
+
+//”:”, ”;”, ”,”, ”.”, ”?”, ”!”.
+int es_simbolo(wchar_t c){
+	return ((c ==58) || (c==59) || (c==44) || (c==46) || (c==62) || (c==33) || (c==32) || (c=='\r') || (c=='\n') );
+}
+
+int es_fin_linea(wchar_t c){
+	return ( (c=='\r') || (c=='\n'));
 }
