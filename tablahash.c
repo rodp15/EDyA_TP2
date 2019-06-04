@@ -55,7 +55,7 @@ void* tablahash_buscar(TablaHash* tabla, void* clave) {
     return NULL;
 
   // La funcion buscarEnLista va a ser la funcion que recorre la LE y busca por la clave.
-  // Esto es porque para nosotros la clave es el mismo valor. TODO revisar esto
+  // Esto es porque para nosotros la clave es el mismo valor.
   return (tabla->manejoColisiones).buscarEnLista(tabla->tabla[idx].inicioLE, clave);
 }
 
@@ -71,12 +71,9 @@ void tablahash_eliminar(TablaHash* tabla, void* clave) {
   if (tabla->tabla[idx].clave != NULL)
     tabla->numElems--;
 
-  // Vaciamos la casilla.
-  // TODO No se deberia liberar el contenido de los punteros ademas?
-  
+  // Vaciamos la casilla.  
   // Primero hay que borrar el elemento de la lista enlazada
   (tabla->manejoColisiones).eliminarLista( &(tabla->tabla[idx].inicioLE), clave );
-
   // Despues hay que ver si la lista enlazada quedo vacia, de ser asi si seteamos la calve a NULL, sino no.
   if(tabla->tabla[idx].inicioLE == NULL)
     tabla->tabla[idx].clave = NULL;

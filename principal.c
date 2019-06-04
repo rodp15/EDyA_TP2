@@ -99,16 +99,19 @@ int main(int argc,  char **argv) {
 
 	Eliminadora e = &eliminar_palabra;
 
-	char *archivoEntrada=malloc(sizeof(char) * 30), *archivoSalida=malloc(sizeof(char) * 30);
-
+	char *archivoEntrada=malloc(sizeof(char) * 30), *archivoSalida=malloc(sizeof(char) * 30);    
     strcpy(archivoEntrada, argv[1]);
     strcpy(archivoSalida, argv[2]);
-    wprintf(L"%s %s \n", archivoEntrada, archivoSalida);
-    wprintf(L"empiezo a leer_palabras:\n");
-    leer_palabras(archivoEntrada, MiTabla, p, p2, e, c);
-    wprintf(L"termino de leer_palabras\n");
 
+    // Creamos archivo salida
+	FILE *salida = fopen(archivoSalida, "w");
+	fclose(salida);
+    
+    leer_palabras(archivoSalida, archivoEntrada, MiTabla, p, p2, e, c);
+
+    tablahash_destruir(MiTabla);
     free(archivoEntrada);
+    free(archivoSalida);
 
     return 0;
 }
@@ -338,8 +341,9 @@ GList separadas_correctas(TablaHash* tabla,wchar_t *palabra,int largoPalabra){
 	return resultado;
 }
 
-void leer_palabras(char *archivoEntrada, TablaHash *tabla, Predicado p, Predicado2 p2, Eliminadora e, Copia c){
+void leer_palabras(char *archivoSalida, char *archivoEntrada, TablaHash *tabla, Predicado p, Predicado2 p2, Eliminadora e, Copia c){
 	FILE* fp = fopen(archivoEntrada, "r");
+	FILE *fps = fopen(archivoSalida, "a");
 	assert(fp != NULL);
 	wchar_t auxC;
 	wchar_t linea[100];
@@ -350,12 +354,9 @@ void leer_palabras(char *archivoEntrada, TablaHash *tabla, Predicado p, Predicad
 		// Se que el fwscanf se cruzo un caracter de terminacion y no lo leyo,
 		// asique lo leemos para descartarlo.
 		auxC = fgetwc(fp);
-		//wprintf(L"cant lineas: %ld \n", nroLineas);
 
 		if(es_fin_linea(auxC)){
 			ban=1;
-			//wprintf(L"ahora viene la ultima palabra de la linea: %ld\n",ban);
-			// TODO Aca podes incrementar la cuenta de en que linea estas aldu.
 		}
 
 		// Luego leemos caracteres hasta cruzarnos con uno que no sea de terminacion de palabra.
@@ -368,30 +369,28 @@ void leer_palabras(char *archivoEntrada, TablaHash *tabla, Predicado p, Predicad
 		ungetwc(auxC, fp);
 
 		largoLinea = wcslen(linea);
-		linea[largoLinea] = '\0';		
-		//wprintf(L"tamaño linea: %ld\n",largoLinea );
-		//wprintf(L"linea actual: %s \n", linea);
+		linea[largoLinea] = '\0';
 		
 		if(!esta_en_diccionario(tabla, linea)){
 			sugerencias = buscar_sugerencias(linea, tabla, p, p2, e, c);
-			wprintf(L"Linea %ld, %s no esta en el diccionario \nQuizas quiso decir: ", nroLineas, linea);
+			fwprintf(fps, L"Linea %ld, %s no esta en el diccionario \nQuizas quiso decir: ", nroLineas, linea);
 			for(i = sugerencias; i->sig != NULL; i = i->sig){
-				wprintf(L"%s, ", (wchar_t*)i->dato);
+				fwprintf(fps, L"%s, ", (wchar_t*)i->dato);
 			}
-			wprintf(L"%s\n",(wchar_t*)i->dato);
+			fwprintf(fps, L"%s\n",(wchar_t*)i->dato);
 		}
 
 		glist_destruir(sugerencias, e);
 
 		if(ban==1){
 			nroLineas++;
-			//wprintf(L"CANT lineas: %ld \n", nroLineas);
 			ban=0;
 		}
 
 	}
 	
 	fclose(fp);
+	fclose(fps);
 }
 
 //”:”, ”;”, ”,”, ”.”, ”?”, ”!”.

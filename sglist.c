@@ -30,7 +30,6 @@ void* glist_buscar(void *lista, void *dato) {
 }
 
 void glist_eliminar_dato(void **lista, void *dato){
-  // TODO revisar esta funcion
   GList *inicioLEReal = (GList*)lista;
 
   // Si el inicio de la lista es vacio no hago nada

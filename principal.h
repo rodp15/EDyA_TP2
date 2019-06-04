@@ -16,7 +16,7 @@
 #define LARGO_ALFABETO 34
 #define MIN_PALABRAS 5000
 
-void leer_palabras(char *archivoEntrada, TablaHash *tabla, Predicado p, Predicado2 p2, Eliminadora e, Copia c);
+void leer_palabras(char *archivoSalida, char *archivoEntrada, TablaHash *tabla, Predicado p, Predicado2 p2, Eliminadora e, Copia c);
 int es_simbolo(wchar_t c);
 //int es_espacio(char c);
 int es_fin_linea(wchar_t c);
