@@ -86,12 +86,12 @@ void eliminar_repetidos(GList lista, Predicado2 valoresIguales, Copia c, Elimina
   }
 }
 
-GList filter(GList lista, Predicado f, Copia c){
+GList filter(GList lista, Predicado f, Copia c, TablaHash* tabla){
   GList listaRetorno=glist_crear();
   for(GList i=lista;i != NULL;i=i->sig){
-    if(f(i->dato)){
+    if(f(tabla, i->dato)){
       void *nuevoNodo=c(i->dato);
-      /*listaRetorno=*/glist_agregar_inicio(((void**)&listaRetorno),nuevoNodo);
+      /glist_agregar_inicio(((void**)&listaRetorno),nuevoNodo);
     }
   }
 
@@ -143,51 +143,3 @@ GList concatenar_listas(GList lista1, GList lista2){
   lista1->sig = lista2;
   return referenciaOrigen;
 }
-/*
-int main(){
-  GList l = glist_crear(), l2=glist_crear();
-  int *j, *k;
-
-  for (int i = 0; i < 5; ++i)
-  {
-    j = malloc(sizeof(int));
-    k = malloc(sizeof(int));
-    *j=i;
-    *k=i;
-    glist_agregar_inicio(((void**)&l),(void*)(j));
-    //glist_agregar_inicio(((void**)&l),(void*)(k));
-    //glist_agregar_inicio(((void**)&l2),(void*)(j));
-    glist_agregar_inicio(((void**)&l2),(void*)(k));
-  }
-
-
-  
-  for (GList i = l; i != NULL; i=i->sig)
-  {
-    printf("orig 1: %d\n",*((int*)(i->dato)));
-  }
-  for (GList i = l2; i != NULL; i=i->sig)
-  {
-    printf("orig 2: %d\n",*((int*)(i->dato)));
-  }
-  */
-  /*
-  Copia c = &copiar_int;
-  Predicado2 p = &intNoIguales;
-  Eliminadora e = &borrarint;
-  eliminar_repetidos(l,p,c,e);
-  
-  for (GList i = l; i != NULL; i=i->sig)
-  {
-    printf("sin repetidos 1:%d\n",*((int*)(i->dato)));
-  }
-  
-
-
-  //CORREGIR
-  l = concatenar_listas(l,l2);
-  for (GList i = l; i != NULL; i = i->sig)
-  {
-    printf("concatenadas: %d\n",*((int*)(i->dato)));
-  }
-}*/

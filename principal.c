@@ -152,22 +152,22 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 	//busco TODAS las posibles a distancia 1
 	GList intercambiadas=posibles_intercambios(palabra,len);
 	eliminar_repetidos(intercambiadas,palabras_iguales,c,e);
-	sugerencias=filter(intercambiadas, esta_en_diccionario,c);
+	sugerencias=filter(intercambiadas, esta_en_diccionario,c, tabla);
 
 	GList insertadas=posibles_inserciones(palabra,len,alfabeto);
 	eliminar_repetidos(insertadas,palabras_iguales,c,e);
-	GList insertadasCorrectas=filter(insertadas, esta_en_diccionario, c);
+	GList insertadasCorrectas=filter(insertadas, esta_en_diccionario, c, tabla);
 	sugerencias=concatenar_listas(sugerencias,insertadasCorrectas);
 
 	GList eliminaciones=posibles_eliminaciones(palabra,len);
 	eliminar_repetidos(eliminaciones,palabras_iguales,c,e);
-	GList eliminadasCorrectas=filter(eliminaciones, esta_en_diccionario, c);
+	GList eliminadasCorrectas=filter(eliminaciones, esta_en_diccionario, c, tabla);
 	sugerencias=concatenar_listas(sugerencias,eliminadasCorrectas);
 
 
 	GList cambiadas=posibles_cambios(palabra,len,alfabeto);
 	eliminar_repetidos(cambiadas,palabras_iguales,c,e);
-	GList cambiadasCorrectas=filter(cambiadas, esta_en_diccionario, c);
+	GList cambiadasCorrectas=filter(cambiadas, esta_en_diccionario, c, tabla);
 	sugerencias=concatenar_listas(sugerencias,cambiadasCorrectas);
 
 	GList separadasCorrectas=separadas_correctas(tabla,palabra,len);
@@ -187,7 +187,7 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 			{
 				GList intercambiadasn=posibles_intercambios(nodo->dato,wcslen(nodo->dato));
 				eliminar_repetidos(intercambiadasn,palabras_iguales,c,e);
-				GList intercambiadasnCorrectas=filter(intercambiadasn,esta_en_diccionario,c);
+				GList intercambiadasnCorrectas=filter(intercambiadasn,esta_en_diccionario,c, tabla);
 				for(GList i=intercambiadasnCorrectas; i!=NULL;i=i->sig){
 					glist_agregar_inicio(((void**)&sugerencias),i->dato);
 				}
@@ -208,7 +208,7 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 			{
 				GList insertadasn=posibles_inserciones(nodo->dato,wcslen(nodo->dato),alfabeto);
 				eliminar_repetidos(insertadasn,palabras_iguales,c,e);
-				GList insertadasCorrectasn=filter(insertadasn,esta_en_diccionario,c);
+				GList insertadasCorrectasn=filter(insertadasn,esta_en_diccionario,c, tabla);
 				for(GList i=insertadasCorrectasn; i!=NULL;i=i->sig){
 					glist_agregar_inicio(((void**)&sugerencias),i->dato);
 				}
@@ -229,7 +229,7 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 			{
 				GList eliminacionesn=posibles_eliminaciones(nodo->dato,wcslen(nodo->dato));
 				eliminar_repetidos(eliminacionesn,palabras_iguales,c,e);
-				GList eliminadasCorrectasn=filter(eliminacionesn,esta_en_diccionario,c);
+				GList eliminadasCorrectasn=filter(eliminacionesn,esta_en_diccionario,c, tabla);
 				for(GList i=eliminadasCorrectasn; i!=NULL;i=i->sig){
 					glist_agregar_inicio(((void**)&sugerencias),i->dato);
 				}
@@ -250,7 +250,7 @@ GList buscar_sugerencias(wchar_t* palabra, TablaHash *tabla,Predicado p, Predica
 			{
 				GList cambiadasn=posibles_cambios(nodo->dato,wcslen(nodo->dato),alfabeto);
 				eliminar_repetidos(cambiadasn,palabras_iguales,c,e);
-				GList cambiadasCorrectasn=filter(cambiadasn,esta_en_diccionario,c);
+				GList cambiadasCorrectasn=filter(cambiadasn,esta_en_diccionario,c, tabla);
 				for(GList i=cambiadasCorrectasn; i!=NULL;i=i->sig){
 					glist_agregar_inicio(((void**)&sugerencias),i->dato);
 				}

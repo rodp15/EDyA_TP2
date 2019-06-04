@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include "tablahash.h"
 
 typedef struct _GNodo{
   void* dato;
@@ -14,7 +15,7 @@ typedef void* (*Copia) (void*);
 typedef void (*Eliminadora) (GList);
 typedef void (*Escritora) (FILE* fp, GList i);
 
-GList filter(GList lista, Predicado f, Copia c);
+GList filter(GList lista, Predicado f, Copia c, TablaHash* tabla);
 
 GList filter2(GList lista, Predicado2 f, Copia c, void* dato);
 
